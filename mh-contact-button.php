@@ -48,7 +48,7 @@ function mhc_check_cache_plugins_notice() {
     if ( !empty($active_caches) ) {
         $plugin_names = implode(', ', $active_caches);
         echo '<div class="notice notice-warning is-dismissible">
-                <p><strong>Cảnh báo hệ thống:</strong> Website đang sử dụng plugin cache (<strong>' . esc_html($plugin_names) . '</strong>). Sau khi lưu cài đặt, vui lòng <strong>xoá cache</strong> để thay đổi có hiệu lực.</p>
+                <p><strong>Lưu ý:</strong> Website đang sử dụng plugin (<strong>' . esc_html($plugin_names) . '</strong>). Sau khi lưu cài đặt, vui lòng <strong>Xoá Cache</strong> để thay đổi có hiệu lực.</p>
               </div>';
     }
 }

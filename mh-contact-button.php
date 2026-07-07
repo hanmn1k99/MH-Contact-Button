@@ -2,8 +2,16 @@
 /**
  * Plugin Name: MH Contact Button - minhhan.net
  * Plugin URI:  https://minhhan.net
- * Description: Phiên bản 2.4: Tạo nút liên hệ đa nền tảng (Phone, Email, Zalo, Messenger, Telegram, Discord) với hiệu ứng mượt mà và tuỳ chỉnh màu sắc.
- * Version:     2.4
+ * Description: Phiên bản 2.7: Tạo nút liên hệ đa kênh (Phone, Email, Zalo, Messenger, Telegram, Discord) cho Wordpress
+  *              - Tùy chỉnh vị trí hiển thị (trái/phải), kích thước, màu sắc, hiệu ứng sóng & rung lắc.
+  *              - Hỗ trợ Call-To-Action (CTA) text.
+  *              - Tự động nhận diện link MXH (Zalo, Messenger, Telegram) và chuyển đổi sang link chuẩn.
+  *              - Tương thích với các plugin cache phổ biến (LiteSpeed Cache, WP Super Cache, W3 Total Cache, WP Rocket, Autoptimize, SiteGround Security & Cache, WP Fastest Cache).
+  *              - Không sử dụng thư viện bên ngoài, tối ưu hóa Native DOM & CSS Animation mượt mà.
+  *              - Dễ dàng cài đặt và cấu hình trong trang quản trị Wordpress.
+  *              - Bảo mật và tối ưu hóa hiệu suất cho website.
+  *              - Hỗ trợ đa ngôn ngữ và dễ dàng mở rộng tính năng trong tương lai.
+ * Version:     2.7
  * Author:      MinhHan
  * License:     GPL2
  */
@@ -40,7 +48,7 @@ function mhc_check_cache_plugins_notice() {
     if ( !empty($active_caches) ) {
         $plugin_names = implode(', ', $active_caches);
         echo '<div class="notice notice-warning is-dismissible">
-                <p><strong>Cảnh báo hệ thống:</strong> Website đang sử dụng plugin cache (<strong>' . esc_html($plugin_names) . '</strong>). Sau khi lưu cài đặt ở bên dưới, bạn <strong>BẮT BUỘC phải xoá cache</strong> để thay đổi có hiệu lực.</p>
+                <p><strong>Cảnh báo hệ thống:</strong> Website đang sử dụng plugin cache (<strong>' . esc_html($plugin_names) . '</strong>). Sau khi lưu cài đặt, vui lòng <strong>xoá cache</strong> để thay đổi có hiệu lực.</p>
               </div>';
     }
 }
@@ -56,7 +64,7 @@ function mhc_add_admin_menu() {
         'manage_options', 
         'mh-contact-settings', 
         'mhc_create_admin_page', 
-        'dashicons-smartphone', 
+        'dashicons-format-chat', 
         80
     );
 }
@@ -66,6 +74,7 @@ function mhc_settings_init() {
     $fields = [
         'mhc_phone', 'mhc_email', 'mhc_zalo', 'mhc_messenger', 'mhc_telegram', 'mhc_discord', 
         'mhc_position', 'mhc_size', 'mhc_wave_effect', 'mhc_cta_text',
+        'mhc_offset_x', 'mhc_offset_y', // Tọa độ tùy chỉnh
         'mhc_color_type', 'mhc_single_color',
         'mhc_color_phone', 'mhc_color_email', 'mhc_color_group', 'mhc_color_zalo', 'mhc_color_messenger', 'mhc_color_telegram', 'mhc_color_discord'
     ];
@@ -80,6 +89,8 @@ function mhc_settings_init() {
 function mhc_create_admin_page() {
     $position   = get_option('mhc_position', 'right');
     $size       = get_option('mhc_size', '50');
+    $offset_x   = get_option('mhc_offset_x', '30');
+    $offset_y   = get_option('mhc_offset_y', '30');
     $wave       = get_option('mhc_wave_effect', '1');
     $color_type = get_option('mhc_color_type', 'default');
     ?>
@@ -94,7 +105,7 @@ function mhc_create_admin_page() {
     </style>
     
     <div class="wrap">
-        <h2>Cài Đặt MH Contact Button - minhhan.net</h2>
+        <h2>MH Contact Button by minhhan.net</h2>
         <div class="mhc-admin-wrap">
             <div class="mhc-admin-main">
                 <form method="post" action="options.php">
@@ -134,16 +145,25 @@ function mhc_create_admin_page() {
                             <th scope="row">Vị trí hiển thị</th>
                             <td>
                                 <select name="mhc_position">
-                                    <option value="right" <?php selected($position, 'right'); ?>>Bên Phải</option>
-                                    <option value="left" <?php selected($position, 'left'); ?>>Bên Trái</option>
+                                    <option value="right" <?php selected($position, 'right'); ?>>Bên phải</option>
+                                    <option value="left" <?php selected($position, 'left'); ?>>Bên trái</option>
                                 </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Khoảng cách lề</th>
+                            <td>
+                                Ngang: <input type="number" name="mhc_offset_x" value="<?php echo esc_attr($offset_x); ?>" class="small-text" style="width: 60px;" /> px 
+                                &nbsp;&nbsp;&nbsp;
+                                Dọc: <input type="number" name="mhc_offset_y" value="<?php echo esc_attr($offset_y); ?>" class="small-text" style="width: 60px;" /> px
+                                <p class="description">Mặc định là 30px.</p>
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">Kích thước nút (px)</th>
                             <td>
                                 <input type="number" name="mhc_size" value="<?php echo esc_attr($size); ?>" class="small-text" min="20" max="80" />
-                                <p class="description">Kích thước tối thiểu: 20px, tối đa: 80px</p>
+                                <p class="description">Tối thiểu 20px, tối đa 80px.</p>
                             </td>
                         </tr>
                         <tr>
@@ -193,9 +213,11 @@ function mhc_create_admin_page() {
             <div class="mhc-admin-sidebar">
                 <div class="mhc-card">
                     <h3>Giới thiệu tác giả</h3>
-                    <p><strong>MinhHan</strong> - Giảng viên, System Admin & Nhà sáng lập Hân Nguyễn CCTV.</p>
-                    <p>Mọi block code đều được tối ưu hóa Native DOM, đảm bảo animation mượt mà chuẩn Pixel-perfect mà không gây lãng phí tài nguyên CPU máy khách.</p>
-                    <p>🌐 <a href="https://minhhan.net" target="_blank">minhhan.net</a></p>
+                    <p><strong>MinhHan</strong> - Wordpress - PHP Developer</p>
+                    <p accesskey="">📧 <a href="mailto:han@minhhan.net">han@minhhan.net</a></p>
+                    <p accesskey="">💬 <a href="https://m.me/minhhanit" target="_blank">Messenger</a></p>
+                    <p accesskey="">🌐 <a href="https://minhhan.net" target="_blank">minhhan.net</a></p>
+
                 </div>
             </div>
         </div>
@@ -232,20 +254,18 @@ function mhc_display_buttons() {
     $has_mxh = (!empty($zalo) || !empty($messenger) || !empty($telegram) || !empty($discord));
     if (empty($phone) && empty($email) && !$has_mxh) return;
 
-    // Đổi tên class hiệu ứng thành Float
     $wave_class = (get_option('mhc_wave_effect', '1') === '1') ? ' mhc-wave-active' : '';
-    $float_class = (get_option('mhc_wave_effect', '1') === '1') ? ' mhc-float-active' : '';
-    $main_classes = $wave_class . $float_class;
+    $shake_class = (get_option('mhc_wave_effect', '1') === '1') ? ' mhc-shake-active' : '';
+    $main_classes = $wave_class . $shake_class;
     
     $position = get_option('mhc_position', 'right');
     
     echo '<div class="mhc-widget mhc-pos-' . $position . ' mhc-animate-sync" id="mhcWidget">';
 
-    // Tạo HTML Label với hiệu ứng Float
     $cta_html = '';
     if (!empty($cta_text)) {
-        $cta_float = (get_option('mhc_wave_effect', '1') === '1') ? ' mhc-cta-float' : '';
-        $cta_html = '<span class="mhc-cta-text' . $cta_float . '">' . esc_html($cta_text) . '</span>';
+        $cta_shake = (get_option('mhc_wave_effect', '1') === '1') ? ' mhc-cta-shake' : '';
+        $cta_html = '<span class="mhc-cta-text' . $cta_shake . '">' . esc_html($cta_text) . '</span>';
     }
 
     $attach_to = '';
@@ -253,7 +273,7 @@ function mhc_display_buttons() {
     elseif (!empty($email)) $attach_to = 'email';
     elseif ($has_mxh) $attach_to = 'mxh';
 
-    // 1. NHÓM MXH MỞ DỌC
+    // 1. NHÓM MXH MỞ DỌC LÊN TRÊN
     if ($has_mxh) {
         echo '<div class="mhc-item-wrapper">';
         if ($attach_to === 'mxh') echo $cta_html; 
@@ -264,10 +284,10 @@ function mhc_display_buttons() {
         </button>';
         
         echo '<div class="mhc-mxh-vertical" id="mhcMxhGroup">';
-        if (!empty($zalo)) echo '<a href="' . esc_url($zalo) . '" class="mhc-btn mhc-zalo' . $float_class . '" target="_blank" title="Zalo"><svg viewBox="0 0 24 24"><title>Zalo</title><path fill="currentColor" d="M11.98 2C6.47 2 2 6.13 2 11.23c0 2.63 1.25 5.05 3.32 6.75.18.15.3.36.27.6l-.38 2.53c-.07.47.45.82.88.58l2.76-1.52c.2-.11.43-.13.65-.08 1.14.28 2.37.43 3.65.43 5.51 0 9.98-4.13 9.98-9.23S17.49 2 11.98 2zm3.43 12.35H9.72c-.41 0-.74-.33-.74-.74 0-.41.33-.74.74-.74h2.95l-3.36-3.8c-.18-.21-.26-.45-.26-.72 0-.54.44-.98.98-.98h4.63c.41 0 .74.33.74.74 0 .41-.33.74-.74.74h-2.67l3.18 3.6c.19.22.29.47.29.74 0 .54-.44.98-.98.98z"/></svg></a>';
-        if (!empty($messenger)) echo '<a href="' . esc_url($messenger) . '" class="mhc-btn mhc-messenger' . $float_class . '" target="_blank" title="Messenger"><svg viewBox="0 0 24 24"><title>Messenger</title><path fill="currentColor" d="M12 2C6.48 2 2 6.14 2 11.25c0 2.91 1.45 5.51 3.71 7.17.19.14.3.36.29.6l-.04 1.78c-.01.59.58 1.04 1.14.85l1.99-.68c.19-.06.4-.04.57.06A10.323 10.323 0 0 0 12 20.5c5.52 0 10-4.14 10-9.25S17.52 2 12 2zm1.18 11.64l-2.09-2.23-4.08 2.23 4.49-4.77 2.14 2.23 4.02-2.23-4.48 4.77z"/></svg></a>';
-        if (!empty($telegram)) echo '<a href="' . esc_url($telegram) . '" class="mhc-btn mhc-telegram' . $float_class . '" target="_blank" title="Telegram"><svg viewBox="0 0 24 24"><title>Telegram</title><path fill="currentColor" d="M9.78 18.65c-.28 0-.24-.1-.37-.47l-1.37-4.51 10.05-6.33c.46-.28.89-.13.54.18l-8.15 7.36-.32 4.49c.44 0 .63-.2.88-.44l2.11-2.05 4.39 3.23c.8.45 1.38.22 1.58-.74l2.88-13.57c.29-1.16-.44-1.69-1.2-1.36L2.3 9.47c-1.13.45-1.12 1.09-.2 1.37l4.31 1.35 9.99-6.28c.47-.29.9-.13.55.18l-8.09 7.31-.31 4.49c.43 0 .62-.19.86-.43l2.12-2.06 4.35 3.21c.8.44 1.37.21 1.57-.75l2.9-13.59c.3-1.16-.43-1.68-1.2-1.35z"/></svg></a>';
-        if (!empty($discord)) echo '<a href="' . esc_url($discord) . '" class="mhc-btn mhc-discord' . $float_class . '" target="_blank" title="Discord"><svg viewBox="0 0 24 24"><title>Discord</title><path fill="currentColor" d="M19.27 4.73A16.13 16.13 0 0 0 14.93 3.4a11.4 11.4 0 0 0-.42.87 14.88 14.88 0 0 0-5 0 11.62 11.62 0 0 0-.43-.87 16.13 16.13 0 0 0-4.34 1.33A16.27 16.27 0 0 0 1.51 17.7a16.3 16.3 0 0 0 5 2.5 11.87 11.87 0 0 0 1-.65 11 11 0 0 1-1.63-.78 7.57 7.57 0 0 0 .14-.11 11.53 11.53 0 0 0 12 0 6.1 6.1 0 0 0 .14.11 11.33 11.33 0 0 1-1.62.78 12.3 12.3 0 0 0 1 .65 16.18 16.18 0 0 0 5.05-2.5 16.23 16.23 0 0 0-3.23-12.97zM8.51 14.11a1.44 1.44 0 0 1-1.35-1.48 1.44 1.44 0 0 1 1.35-1.48 1.45 1.45 0 0 1 1.36 1.48 1.45 1.45 0 0 1-1.36 1.48zm6.98 0a1.44 1.44 0 0 1-1.35-1.48 1.44 1.44 0 0 1 1.35-1.48 1.45 1.45 0 0 1 1.36 1.48 1.45 1.45 0 0 1-1.36 1.48z"/></svg></a>';
+        if (!empty($zalo)) echo '<a href="' . esc_url($zalo) . '" class="mhc-btn mhc-zalo' . $shake_class . '" target="_blank" title="Zalo"><svg viewBox="0 0 24 24"><title>Zalo</title><path fill="currentColor" d="M11.98 2C6.47 2 2 6.13 2 11.23c0 2.63 1.25 5.05 3.32 6.75.18.15.3.36.27.6l-.38 2.53c-.07.47.45.82.88.58l2.76-1.52c.2-.11.43-.13.65-.08 1.14.28 2.37.43 3.65.43 5.51 0 9.98-4.13 9.98-9.23S17.49 2 11.98 2zm3.43 12.35H9.72c-.41 0-.74-.33-.74-.74 0-.41.33-.74.74-.74h2.95l-3.36-3.8c-.18-.21-.26-.45-.26-.72 0-.54.44-.98.98-.98h4.63c.41 0 .74.33.74.74 0 .41-.33.74-.74.74h-2.67l3.18 3.6c.19.22.29.47.29.74 0 .54-.44.98-.98.98z"/></svg></a>';
+        if (!empty($messenger)) echo '<a href="' . esc_url($messenger) . '" class="mhc-btn mhc-messenger' . $shake_class . '" target="_blank" title="Messenger"><svg viewBox="0 0 24 24"><title>Messenger</title><path fill="currentColor" d="M12 2C6.48 2 2 6.14 2 11.25c0 2.91 1.45 5.51 3.71 7.17.19.14.3.36.29.6l-.04 1.78c-.01.59.58 1.04 1.14.85l1.99-.68c.19-.06.4-.04.57.06A10.323 10.323 0 0 0 12 20.5c5.52 0 10-4.14 10-9.25S17.52 2 12 2zm1.18 11.64l-2.09-2.23-4.08 2.23 4.49-4.77 2.14 2.23 4.02-2.23-4.48 4.77z"/></svg></a>';
+        if (!empty($telegram)) echo '<a href="' . esc_url($telegram) . '" class="mhc-btn mhc-telegram' . $shake_class . '" target="_blank" title="Telegram"><svg viewBox="0 0 24 24"><title>Telegram</title><path fill="currentColor" d="M9.78 18.65c-.28 0-.24-.1-.37-.47l-1.37-4.51 10.05-6.33c.46-.28.89-.13.54.18l-8.15 7.36-.32 4.49c.44 0 .63-.2.88-.44l2.11-2.05 4.39 3.23c.8.45 1.38.22 1.58-.74l2.88-13.57c.29-1.16-.44-1.69-1.2-1.36L2.3 9.47c-1.13.45-1.12 1.09-.2 1.37l4.31 1.35 9.99-6.28c.47-.29.9-.13.55.18l-8.09 7.31-.31 4.49c.43 0 .62-.19.86-.43l2.12-2.06 4.35 3.21c.8.44 1.37.21 1.57-.75l2.9-13.59c.3-1.16-.43-1.68-1.2-1.35z"/></svg></a>';
+        if (!empty($discord)) echo '<a href="' . esc_url($discord) . '" class="mhc-btn mhc-discord' . $shake_class . '" target="_blank" title="Discord"><svg viewBox="0 0 24 24"><title>Discord</title><path fill="currentColor" d="M19.27 4.73A16.13 16.13 0 0 0 14.93 3.4a11.4 11.4 0 0 0-.42.87 14.88 14.88 0 0 0-5 0 11.62 11.62 0 0 0-.43-.87 16.13 16.13 0 0 0-4.34 1.33A16.27 16.27 0 0 0 1.51 17.7a16.3 16.3 0 0 0 5 2.5 11.87 11.87 0 0 0 1-.65 11 11 0 0 1-1.63-.78 7.57 7.57 0 0 0 .14-.11 11.53 11.53 0 0 0 12 0 6.1 6.1 0 0 0 .14.11 11.33 11.33 0 0 1-1.62.78 12.3 12.3 0 0 0 1 .65 16.18 16.18 0 0 0 5.05-2.5 16.23 16.23 0 0 0-3.23-12.97zM8.51 14.11a1.44 1.44 0 0 1-1.35-1.48 1.44 1.44 0 0 1 1.35-1.48 1.45 1.45 0 0 1 1.36 1.48 1.45 1.45 0 0 1-1.36 1.48zm6.98 0a1.44 1.44 0 0 1-1.35-1.48 1.44 1.44 0 0 1 1.35-1.48 1.45 1.45 0 0 1 1.36 1.48 1.45 1.45 0 0 1-1.36 1.48z"/></svg></a>';
         echo '</div></div>';
     }
 
@@ -306,7 +326,6 @@ function mhc_display_buttons() {
                     toggle.querySelector(".mhc-icon-chat").style.display = mxhGroup.classList.contains("mhc-active") ? "none" : "block";
                     toggle.querySelector(".mhc-icon-close").style.display = mxhGroup.classList.contains("mhc-active") ? "block" : "none";
 
-                    // Đảm bảo DOM luôn reset lại nhịp Float khi click
                     mhcWidget.classList.remove("mhc-animate-sync"); 
                     void mhcWidget.offsetWidth;                     
                     mhcWidget.classList.add("mhc-animate-sync");    
@@ -318,12 +337,14 @@ function mhc_display_buttons() {
 }
 
 /**
- * 5. CSS STYLING & HIỆU ỨNG TRÔI
+ * 5. CSS STYLING & GẮN TỌA ĐỘ OFFSET
  */
 add_action('wp_head', 'mhc_frontend_css');
 function mhc_frontend_css() {
     $pos = get_option('mhc_position', 'right');
     $size = intval(get_option('mhc_size', '50'));
+    $offset_x = intval(get_option('mhc_offset_x', '30'));
+    $offset_y = intval(get_option('mhc_offset_y', '30'));
     $svg_size = intval($size * 0.52);
     $color_type = get_option('mhc_color_type', 'default');
     
@@ -345,10 +366,12 @@ function mhc_frontend_css() {
     ?>
     <style>
         .mhc-widget {
-            position: fixed; bottom: 30px; z-index: 99999;
+            position: fixed; 
+            bottom: <?php echo $offset_y; ?>px; /* Áp dụng tọa độ Y tùy chỉnh */
+            z-index: 99999;
             display: flex; flex-direction: column; gap: 12px;
             align-items: center; 
-            <?php echo ($pos === 'left') ? 'left: 30px;' : 'right: 30px;'; ?>
+            <?php echo ($pos === 'left') ? 'left: ' . $offset_x . 'px;' : 'right: ' . $offset_x . 'px;'; /* Áp dụng tọa độ X tùy chỉnh */ ?>
         }
         .mhc-item-wrapper { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: <?php echo $size; ?>px; }
         
@@ -379,8 +402,8 @@ function mhc_frontend_css() {
             pointer-events: none; transition: opacity 0.3s, visibility 0.3s;
             font-family: sans-serif; z-index: 1;
         }
-        .mhc-pos-right .mhc-cta-text { right: calc(100% + 15px); }
-        .mhc-pos-left .mhc-cta-text { left: calc(100% + 15px); }
+        .mhc-pos-right .mhc-cta-text { right: calc(100% + 25px); } 
+        .mhc-pos-left .mhc-cta-text { left: calc(100% + 25px); }
         .mhc-widget.is-active .mhc-cta-text { opacity: 0; visibility: hidden; }
 
         .mhc-phone { background-color: <?php echo $c_phone; ?>; }
@@ -406,27 +429,29 @@ function mhc_frontend_css() {
         }
         .mhc-mxh-vertical .mhc-btn { position: relative; }
 
-        /* HIỆU ỨNG TRÔI LƠ LỬNG (FLOATING) CHU KỲ 2.5 GIÂY */
         .mhc-animate-sync .mhc-wave-active::before {
             content: ''; position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             border-radius: 50%; background: inherit;
-            z-index: -1; animation: mhcWave 2.5s infinite ease-out;
+            z-index: -1; animation: mhcWave 2s infinite ease-out;
         }
-        .mhc-animate-sync .mhc-float-active > svg { 
-            animation: mhcFloat 2.5s ease-in-out infinite; 
+        .mhc-animate-sync .mhc-shake-active > svg { 
+            animation: mhcShake 2s infinite ease-in-out; 
         }
-        .mhc-animate-sync .mhc-cta-float {
-            animation: mhcFloat 2.5s ease-in-out infinite;
+        .mhc-animate-sync .mhc-cta-shake {
+            animation: mhcShake 2s infinite ease-in-out;
+            transform-origin: center center !important; 
         }
         
         @keyframes mhcWave {
             0% { transform: scale(1); opacity: 0.6; }
             100% { transform: scale(1.6); opacity: 0; }
         }
-        @keyframes mhcFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+        @keyframes mhcShake {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30%, 50% { transform: rotate(-10deg) scale(1.05); } 
+            20%, 40% { transform: rotate(10deg) scale(1.05); }
+            60% { transform: rotate(0deg) scale(1); }
         }
     </style>
     <?php

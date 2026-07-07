@@ -2,8 +2,8 @@
 /**
  * Plugin Name: MH Contact Button - minhhan.net
  * Plugin URI:  https://minhhan.net
- * Description: Phiên bản 2.1: Đồng bộ Animation tuyệt đối (DOM Reflow), Căn trục dọc Pixel-perfect, Tối ưu UI Mobile.
- * Version:     2.1
+ * Description: Phiên bản 2.3 - Tạo nút liên hệ đa kênh (Phone, Email, Zalo, Messenger, Telegram, Discord) hiển thị nổi trên website. Tối ưu Native DOM, animation mượt mà chuẩn Pixel-perfect.
+ * Version:     2.3
  * Author:      MinhHan
  * License:     GPL2
  */
@@ -40,7 +40,7 @@ function mhc_check_cache_plugins_notice() {
     if ( !empty($active_caches) ) {
         $plugin_names = implode(', ', $active_caches);
         echo '<div class="notice notice-warning is-dismissible">
-                <p><strong>Lưu ý:</strong> Website đang sử dụng plugin (<strong>' . esc_html($plugin_names) . '</strong>). Sau khi <i>lưu cấu hình</i>, <strong>vui lòng xoá cache </strong> để thay đổi có hiệu lực.</p>
+                <p><strong>Cảnh báo hệ thống:</strong> Website đang sử dụng plugin cache (<strong>' . esc_html($plugin_names) . '</strong>). Sau khi lưu cài đặt ở bên dưới, bạn <strong>BẮT BUỘC phải xoá cache</strong> để thay đổi có hiệu lực.</p>
               </div>';
     }
 }
@@ -56,7 +56,7 @@ function mhc_add_admin_menu() {
         'manage_options', 
         'mh-contact-settings', 
         'mhc_create_admin_page', 
-        'dashicons-format-chat', 
+        'dashicons-smartphone', 
         80
     );
 }
@@ -100,7 +100,7 @@ function mhc_create_admin_page() {
                 <form method="post" action="options.php">
                     <?php settings_fields('mhc_settings_group'); ?>
                     
-                    <div class="section-title">1. Tùy biến Màu sắc</div>
+                    <div class="section-title">1. Màu sắc</div>
                     <table class="form-table">
                         <tr>
                             <th scope="row">Chế độ màu</th>
@@ -112,13 +112,13 @@ function mhc_create_admin_page() {
                                 </select>
                                 
                                 <div id="mhcSingleColor" class="color-group <?php echo ($color_type == 'single') ? 'active' : ''; ?>">
-                                    <label>Chọn màu chung:</label> <input type="color" name="mhc_single_color" value="<?php echo esc_attr(get_option('mhc_single_color', '#2271b1')); ?>" />
+                                    <label>Chọn màu: </label> <input type="color" name="mhc_single_color" value="<?php echo esc_attr(get_option('mhc_single_color', '#2271b1')); ?>" />
                                 </div>
                                 
                                 <div id="mhcCustomColor" class="color-group <?php echo ($color_type == 'custom') ? 'active' : ''; ?>">
                                     <p>Phone: <input type="color" name="mhc_color_phone" value="<?php echo esc_attr(get_option('mhc_color_phone', '#4CAF50')); ?>" /></p>
                                     <p>Email: <input type="color" name="mhc_color_email" value="<?php echo esc_attr(get_option('mhc_color_email', '#EA4335')); ?>" /></p>
-                                    <p>MXH: <input type="color" name="mhc_color_group" value="<?php echo esc_attr(get_option('mhc_color_group', '#37474F')); ?>" /></p>
+                                    <p>Mạng xã hội: <input type="color" name="mhc_color_group" value="<?php echo esc_attr(get_option('mhc_color_group', '#37474F')); ?>" /></p>
                                     <p>Zalo: <input type="color" name="mhc_color_zalo" value="<?php echo esc_attr(get_option('mhc_color_zalo', '#0068FF')); ?>" /></p>
                                     <p>Messenger: <input type="color" name="mhc_color_messenger" value="<?php echo esc_attr(get_option('mhc_color_messenger', '#0084FF')); ?>" /></p>
                                     <p>Telegram: <input type="color" name="mhc_color_telegram" value="<?php echo esc_attr(get_option('mhc_color_telegram', '#26A5E4')); ?>" /></p>
@@ -143,12 +143,12 @@ function mhc_create_admin_page() {
                             <th scope="row">Kích thước nút (px)</th>
                             <td>
                                 <input type="number" name="mhc_size" value="<?php echo esc_attr($size); ?>" class="small-text" min="20" max="80" />
-                                <p class="description">Kích thước từ 20px đến 80px.</p>
+                                <p class="description">Kích thước tối thiểu 20px và tối đa 80px.</p>
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">Hiệu ứng</th>
-                            <td><label><input type="checkbox" name="mhc_wave_effect" value="1" <?php checked($wave, '1'); ?> /> Kích hoạt hiệu ứng shake</label></td>
+                            <td><label><input type="checkbox" name="mhc_wave_effect" value="1" <?php checked($wave, '1'); ?> /> Kích hoạt hiệu ứng</label></td>
                         </tr>
                         <tr>
                             <th scope="row">Tiêu đề (Call-To-Action)</th>
@@ -169,20 +169,20 @@ function mhc_create_admin_page() {
                             <td><input type="email" name="mhc_email" value="<?php echo esc_attr(get_option('mhc_email')); ?>" class="regular-text" placeholder="contact@minhhan.net" /></td>
                         </tr>
                         <tr>
-                            <th scope="row">Zalo (SĐT)</th>
+                            <th scope="row">Zalo</th>
                             <td><input type="text" name="mhc_zalo" value="<?php echo esc_attr(get_option('mhc_zalo')); ?>" class="regular-text" placeholder="0987654321" /></td>
                         </tr>
                         <tr>
-                            <th scope="row">Messenger (ID/Username)</th>
+                            <th scope="row">Messenger</th>
                             <td><input type="text" name="mhc_messenger" value="<?php echo esc_attr(get_option('mhc_messenger')); ?>" class="regular-text" placeholder="yourpageID" /></td>
                         </tr>
                         <tr>
-                            <th scope="row">Telegram (ID/Link)</th>
+                            <th scope="row">Telegram</th>
                             <td><input type="text" name="mhc_telegram" value="<?php echo esc_attr(get_option('mhc_telegram')); ?>" class="regular-text" placeholder="username hoặc https://t.me/..." /></td>
                         </tr>
                         <tr>
-                            <th scope="row">Discord (Link mời)</th>
-                            <td><input type="url" name="mhc_discord" value="<?php echo esc_attr(get_option('mhc_discord')); ?>" class="regular-text" placeholder="Bắt buộc nhập full link: https://discord.gg/..." /></td>
+                            <th scope="row">Discord</th>
+                            <td><input type="url" name="mhc_discord" value="<?php echo esc_attr(get_option('mhc_discord')); ?>" class="regular-text" placeholder="https://discord.gg/..." /></td>
                         </tr>
                     </table>
                     
@@ -194,7 +194,7 @@ function mhc_create_admin_page() {
                 <div class="mhc-card">
                     <h3>Giới thiệu tác giả</h3>
                     <p><strong>MinhHan</strong> - Giảng viên, System Admin & Nhà sáng lập Hân Nguyễn CCTV.</p>
-                    <p>Plugin được thiết kế tối giản, loại bỏ hoàn toàn render block, đảm bảo tính đồng bộ hoàn hảo ở mức pixel và tối ưu tốc độ load server.</p>
+                    <p>Mọi block code đều được tối ưu hóa Native DOM, đảm bảo animation mượt mà chuẩn Pixel-perfect mà không gây lãng phí tài nguyên CPU máy khách.</p>
                     <p>🌐 <a href="https://minhhan.net" target="_blank">minhhan.net</a></p>
                 </div>
             </div>
@@ -213,7 +213,7 @@ function mhc_create_admin_page() {
 }
 
 /**
- * 4. HIỂN THỊ HTML & LOGIC JS ĐỒNG BỘ TIMELINE (REFLOW)
+ * 4. HIỂN THỊ HTML & LOGIC
  */
 add_action('wp_footer', 'mhc_display_buttons');
 function mhc_display_buttons() {
@@ -232,27 +232,31 @@ function mhc_display_buttons() {
     $has_mxh = (!empty($zalo) || !empty($messenger) || !empty($telegram) || !empty($discord));
     if (empty($phone) && empty($email) && !$has_mxh) return;
 
-    // Các class hiệu ứng cơ sở
     $wave_class = (get_option('mhc_wave_effect', '1') === '1') ? ' mhc-wave-active' : '';
     $shake_class = (get_option('mhc_wave_effect', '1') === '1') ? ' mhc-shake-active' : '';
     $main_classes = $wave_class . $shake_class;
     
     $position = get_option('mhc_position', 'right');
     
-    // THÊM CLASS mhc-animate-sync MẶC ĐỊNH ĐỂ CHẠY ANIMATION KHI LOAD TRANG
     echo '<div class="mhc-widget mhc-pos-' . $position . ' mhc-animate-sync" id="mhcWidget">';
 
+    // Tạo mã HTML cho Label (Thêm class mhc-cta-shake để lắc đồng bộ)
     $cta_html = '';
     if (!empty($cta_text)) {
-        $cta_html = '<span class="mhc-cta-text">' . esc_html($cta_text) . '</span>';
+        $cta_shake = (get_option('mhc_wave_effect', '1') === '1') ? ' mhc-cta-shake' : '';
+        $cta_html = '<span class="mhc-cta-text' . $cta_shake . '">' . esc_html($cta_text) . '</span>';
     }
-    $cta_placed = false;
 
-    // 1. NHÓM MXH MỞ DỌC LÊN TRÊN
+    // Xác định đối tượng sẽ được gắn Label (Ưu tiên gắn vào nút dưới cùng)
+    $attach_to = '';
+    if (!empty($phone)) $attach_to = 'phone';
+    elseif (!empty($email)) $attach_to = 'email';
+    elseif ($has_mxh) $attach_to = 'mxh';
+
+    // 1. NHÓM MXH MỞ DỌC (Sắp xếp hiển thị trên cùng)
     if ($has_mxh) {
         echo '<div class="mhc-item-wrapper">';
-        echo $cta_html; 
-        $cta_placed = true;
+        if ($attach_to === 'mxh') echo $cta_html; 
 
         echo '<button class="mhc-btn mhc-group-btn' . $main_classes . '" id="mhcToggle" title="Mạng xã hội">
             <svg class="mhc-icon-chat" viewBox="0 0 24 24"><title>Mở Mạng Xã Hội</title><path fill="currentColor" d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
@@ -267,25 +271,24 @@ function mhc_display_buttons() {
         echo '</div></div>';
     }
 
-    // 2. NÚT PHONE
-    if (!empty($phone)) {
+    // 2. NÚT EMAIL (Sắp xếp hiển thị ở giữa)
+    if (!empty($email)) {
         echo '<div class="mhc-item-wrapper">';
-        if (!$cta_placed) { echo $cta_html; $cta_placed = true; }
-        echo '<a href="tel:' . esc_attr($phone) . '" class="mhc-btn mhc-phone' . $main_classes . '" title="Gọi điện"><svg viewBox="0 0 24 24"><title>Điện thoại</title><path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></a>';
+        if ($attach_to === 'email') echo $cta_html;
+        echo '<a href="mailto:' . esc_attr($email) . '" class="mhc-btn mhc-email' . $main_classes . '" title="Gửi Email"><svg viewBox="0 0 24 24"><title>Email</title><path fill="currentColor" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></a>';
         echo '</div>';
     }
 
-    // 3. NÚT EMAIL
-    if (!empty($email)) {
+    // 3. NÚT PHONE (Sắp xếp hiển thị dưới cùng)
+    if (!empty($phone)) {
         echo '<div class="mhc-item-wrapper">';
-        if (!$cta_placed) { echo $cta_html; $cta_placed = true; }
-        echo '<a href="mailto:' . esc_attr($email) . '" class="mhc-btn mhc-email' . $main_classes . '" title="Gửi Email"><svg viewBox="0 0 24 24"><title>Email</title><path fill="currentColor" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></a>';
+        if ($attach_to === 'phone') echo $cta_html;
+        echo '<a href="tel:' . esc_attr($phone) . '" class="mhc-btn mhc-phone' . $main_classes . '" title="Gọi điện"><svg viewBox="0 0 24 24"><title>Điện thoại</title><path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></a>';
         echo '</div>';
     }
 
     echo '</div>';
 
-    // JS ĐỒNG BỘ ANIMATION BẰNG KỸ THUẬT DOM REFLOW
     if ($has_mxh) {
         echo '<script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -296,8 +299,6 @@ function mhc_display_buttons() {
             if (toggle && mxhGroup && mhcWidget) {
                 toggle.addEventListener("click", function(e) {
                     e.preventDefault();
-                    
-                    // Xử lý mở/đóng menu
                     mxhGroup.classList.toggle("mhc-active");
                     toggle.classList.toggle("mhc-btn-active");
                     mhcWidget.classList.toggle("is-active");
@@ -305,12 +306,10 @@ function mhc_display_buttons() {
                     toggle.querySelector(".mhc-icon-chat").style.display = mxhGroup.classList.contains("mhc-active") ? "none" : "block";
                     toggle.querySelector(".mhc-icon-close").style.display = mxhGroup.classList.contains("mhc-active") ? "block" : "none";
 
-                    // ==========================================
-                    // ÉP ĐỒNG BỘ NHỊP LẮC & SÓNG BẰNG REFLOW TRICK
-                    // ==========================================
-                    mhcWidget.classList.remove("mhc-animate-sync"); // Tạm tháo animation
-                    void mhcWidget.offsetWidth;                     // Lệnh này buộc trình duyệt tính toán lại Render Tree
-                    mhcWidget.classList.add("mhc-animate-sync");    // Lắp lại animation (tất cả sẽ chạy từ giây số 0 cùng nhau)
+                    // Reflow để giữ nguyên vẹn nhịp animation
+                    mhcWidget.classList.remove("mhc-animate-sync"); 
+                    void mhcWidget.offsetWidth;                     
+                    mhcWidget.classList.add("mhc-animate-sync");    
                 });
             }
         });
@@ -319,7 +318,7 @@ function mhc_display_buttons() {
 }
 
 /**
- * 5. CSS STYLING & CĂN LỀ TRỤC DỌC (PIXEL-PERFECT)
+ * 5. CSS STYLING & CĂN LỀ
  */
 add_action('wp_head', 'mhc_frontend_css');
 function mhc_frontend_css() {
@@ -348,37 +347,45 @@ function mhc_frontend_css() {
         .mhc-widget {
             position: fixed; bottom: 30px; z-index: 99999;
             display: flex; flex-direction: column; gap: 12px;
-            align-items: center; /* Đảm bảo mọi đối tượng bám sát trục giữa tuyệt đối */
+            align-items: center; 
             <?php echo ($pos === 'left') ? 'left: 30px;' : 'right: 30px;'; ?>
         }
-        .mhc-item-wrapper { position: relative; display: flex; align-items: center; justify-content: center; }
+        .mhc-item-wrapper { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: <?php echo $size; ?>px; }
         
         .mhc-btn {
             display: flex; align-items: center; justify-content: center;
             width: <?php echo $size; ?>px; height: <?php echo $size; ?>px;
             border-radius: 50%; color: #fff !important;
             text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: all 0.3s ease; border: none; cursor: pointer; padding: 0; margin: 0;
-            position: relative; z-index: 2; outline: none; box-sizing: border-box;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease; 
+            border: none; cursor: pointer; padding: 0; margin: 0;
+            position: absolute; z-index: 2; outline: none; box-sizing: border-box;
         }
-        .mhc-btn svg { width: <?php echo $svg_size; ?>px; height: <?php echo $svg_size; ?>px; transition: transform 0.3s ease; }
-        .mhc-btn:hover { transform: translateY(-4px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); filter: brightness(110%); }
+        .mhc-btn > svg { width: <?php echo $svg_size; ?>px; height: <?php echo $svg_size; ?>px; }
+        .mhc-btn:hover { transform: translateY(-4px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
 
-        /* Tiêu đề CTA */
+        /* Icon trong nút Toggle */
+        .mhc-group-btn > svg { position: absolute; transition: opacity 0.3s ease; }
+        .mhc-icon-close { opacity: 0; }
+        .mhc-btn-active .mhc-icon-chat { opacity: 0; }
+        .mhc-btn-active .mhc-icon-close { opacity: 1; }
+
+        /* Tiêu đề CTA được đồng bộ thiết kế với nút Gọi */
         .mhc-cta-text {
             position: absolute; white-space: nowrap;
-            background-color: #fff; color: #333;
-            padding: 6px 14px; border-radius: 20px;
-            font-size: 14px; font-weight: 600;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            background-color: <?php echo $c_phone; ?>; /* Lấy màu nền của nút Gọi */
+            color: #ffffff; /* Trữ trắng cho đồng nhất */
+            padding: 8px 16px; border-radius: 24px;
+            font-size: 14px; font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             pointer-events: none; transition: opacity 0.3s, visibility 0.3s;
-            font-family: sans-serif;
+            font-family: sans-serif; z-index: 1;
         }
         .mhc-pos-right .mhc-cta-text { right: calc(100% + 15px); }
         .mhc-pos-left .mhc-cta-text { left: calc(100% + 15px); }
         .mhc-widget.is-active .mhc-cta-text { opacity: 0; visibility: hidden; }
 
-        /* Màu sắc */
+        /* Màu sắc các nút */
         .mhc-phone { background-color: <?php echo $c_phone; ?>; }
         .mhc-email { background-color: <?php echo $c_email; ?>; }
         .mhc-group-btn { background-color: <?php echo $c_group; ?>; }
@@ -393,7 +400,7 @@ function mhc_frontend_css() {
             transform: translateX(-50%) translateY(20px) scale(0.8);
             margin-bottom: 12px;
             display: flex; flex-direction: column-reverse; gap: 12px;
-            align-items: center; /* Trục giữa nội bộ của thanh nổi */
+            align-items: center;
             opacity: 0; pointer-events: none;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -401,16 +408,26 @@ function mhc_frontend_css() {
             opacity: 1; pointer-events: auto;
             transform: translateX(-50%) translateY(0) scale(1);
         }
+        .mhc-mxh-vertical .mhc-btn { position: relative; }
 
-        /* KHỞI ĐỘNG ANIMATION CHỈ KHI CÓ CLASS .mhc-animate-sync (Do JS cấp phép) */
+        /* KHỞI ĐỘNG ANIMATION KHI CÓ CLASS .mhc-animate-sync */
         .mhc-animate-sync .mhc-wave-active::before {
             content: ''; position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             border-radius: 50%; background: inherit;
             z-index: -1; animation: mhcWave 2s infinite ease-out;
         }
-        .mhc-animate-sync .mhc-shake-active svg { 
+        .mhc-animate-sync .mhc-shake-active > svg { 
             animation: mhcShake 2s infinite ease-in-out; 
+        }
+        
+        /* HIỆU ỨNG LẮC CHO CTA */
+        .mhc-animate-sync .mhc-cta-shake {
+            animation: mhcShake 2s infinite ease-in-out;
+            transform-origin: right center; /* Căn lắc từ lề phải (nếu nút nằm bên phải) */
+        }
+        .mhc-pos-left .mhc-animate-sync .mhc-cta-shake {
+            transform-origin: left center;
         }
         
         @keyframes mhcWave {
